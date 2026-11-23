@@ -22,7 +22,7 @@ jobs:
         node: [22, 24]
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
@@ -65,7 +65,7 @@ jobs:
       TEST_DATABASE_URL: postgres://insight_reader:insight_reader@localhost:54329/insight
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
         with:
           node-version: 22
