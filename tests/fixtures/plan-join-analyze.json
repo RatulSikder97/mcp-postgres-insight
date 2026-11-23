@@ -1,0 +1,112 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Aggregate",
+      "Strategy": "Hashed",
+      "Partial Mode": "Simple",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 1442.53,
+      "Total Cost": 1450.86,
+      "Plan Rows": 833,
+      "Plan Width": 21,
+      "Actual Startup Time": 11.337,
+      "Actual Total Time": 11.382,
+      "Actual Rows": 833,
+      "Actual Loops": 1,
+      "Output": ["c.full_name", "count(*)"],
+      "Group Key": ["c.full_name"],
+      "Planned Partitions": 0,
+      "HashAgg Batches": 1,
+      "Peak Memory Usage": 105,
+      "Disk Usage": 0,
+      "Plans": [
+        {
+          "Node Type": "Hash Join",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Inner",
+          "Startup Cost": 134.91,
+          "Total Cost": 1392.55,
+          "Plan Rows": 9996,
+          "Plan Width": 13,
+          "Actual Startup Time": 1.044,
+          "Actual Total Time": 10.215,
+          "Actual Rows": 9996,
+          "Actual Loops": 1,
+          "Output": ["c.full_name"],
+          "Inner Unique": true,
+          "Hash Cond": "(o.customer_id = c.id)",
+          "Plans": [
+            {
+              "Node Type": "Seq Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Relation Name": "orders",
+              "Schema": "app",
+              "Alias": "o",
+              "Startup Cost": 0.00,
+              "Total Cost": 1100.00,
+              "Plan Rows": 60000,
+              "Plan Width": 8,
+              "Actual Startup Time": 0.045,
+              "Actual Total Time": 5.155,
+              "Actual Rows": 60000,
+              "Actual Loops": 1,
+              "Output": ["o.id", "o.customer_id", "o.status", "o.total_cents", "o.created_at"]
+            },
+            {
+              "Node Type": "Hash",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 124.50,
+              "Total Cost": 124.50,
+              "Plan Rows": 833,
+              "Plan Width": 21,
+              "Actual Startup Time": 0.968,
+              "Actual Total Time": 0.969,
+              "Actual Rows": 833,
+              "Actual Loops": 1,
+              "Output": ["c.full_name", "c.id"],
+              "Hash Buckets": 1024,
+              "Original Hash Buckets": 1024,
+              "Hash Batches": 1,
+              "Original Hash Batches": 1,
+              "Peak Memory Usage": 54,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "customers",
+                  "Schema": "app",
+                  "Alias": "c",
+                  "Startup Cost": 0.00,
+                  "Total Cost": 124.50,
+                  "Plan Rows": 833,
+                  "Plan Width": 21,
+                  "Actual Startup Time": 0.036,
+                  "Actual Total Time": 0.889,
+                  "Actual Rows": 833,
+                  "Actual Loops": 1,
+                  "Output": ["c.full_name", "c.id"],
+                  "Filter": "(c.country = 'BD'::text)",
+                  "Rows Removed by Filter": 4167
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Query Identifier": 6727274750153647043,
+    "Planning Time": 0.819,
+    "Triggers": [
+    ],
+    "Execution Time": 11.515
+  }
+]
