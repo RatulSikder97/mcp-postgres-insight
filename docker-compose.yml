@@ -1,0 +1,23 @@
+# Local development / integration-test database. Credentials are for local use only.
+services:
+  postgres:
+    image: postgres:17-alpine
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=all
+    environment:
+      POSTGRES_USER: insight
+      POSTGRES_PASSWORD: insight
+      POSTGRES_DB: insight
+    ports:
+      - "54329:5432"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U insight -d insight"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
