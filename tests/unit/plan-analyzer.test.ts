@@ -73,6 +73,22 @@ describe('analyzePlan on a real seq-scan plan', () => {
   });
 });
 
+describe('analyzePlan on a real EXPLAIN ANALYZE join plan', () => {
+  const plan = fixture('plan-join-analyze.json');
+
+  it('reports timings and flags the unfiltered scan of the large side', () => {
+    const stats = new Map<string, RelationStats>([
+      ...ordersNoIndex,
+      ['app.customers', { rowEstimate: 5_000, indexes: [{ name: 'customers_pkey', columns: ['id'] }] }],
+    ]);
+    const { summary, hints } = analyzePlan(plan, stats, options);
+    expect(summary.analyzed).toBe(true);
+    expect(summary.executionMs).toBeGreaterThan(0);
+    expect(collectRelations(plan.Plan).map((relation) => relation.name).sort()).toEqual(['customers', 'orders']);
+    expect(hints).toEqual([expect.objectContaining({ kind: 'full_table_scan', relation: 'app.orders' })]);
+  });
+});
+
 describe('analyzePlan heuristics', () => {
   const seqScan = (overrides: Partial<PlanNode>): PlanNode => ({
     'Node Type': 'Seq Scan',
