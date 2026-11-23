@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, typecheck, unit tests, build (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+      - run: pnpm build
+      - name: Smoke-test the built CLI rejects bad config
+        run: |
+          set +e
+          output=$(DATABASE_URL=mysql://nope node dist/index.js 2>&1)
+          status=$?
+          echo "$output"
+          test "$status" -eq 1 && echo "$output" | grep -q "DATABASE_URL"
+
+  integration:
+    name: Integration tests (PostgreSQL ${{ matrix.postgres }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: [16, 17]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}-alpine
+        env:
+          POSTGRES_USER: insight
+          POSTGRES_PASSWORD: insight
+          POSTGRES_DB: insight
+        ports:
+          - 54329:5432
+        options: >-
+          --health-cmd "pg_isready -U insight -d insight"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      TEST_DATABASE_URL: postgres://insight_reader:insight_reader@localhost:54329/insight
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Seed sample database
+        run: psql "postgres://insight:insight@localhost:54329/insight" -v ON_ERROR_STOP=1 -f sql/01-seed.sql
+      - run: pnpm test:integration
